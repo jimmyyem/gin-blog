@@ -2,13 +2,13 @@ package util
 
 import (
 	"gin-blog/pkg/setting"
-	"github.com/unknwon/com"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 )
 
-func GetPage(c *gin.Context) int {
+func GetOffset(c *gin.Context) int {
 	result := 0
-	page, _ := com.StrTo(c.Query("page")).Int()
+	page := cast.ToInt(c.Query("page"))
 	if page > 0 {
 		result = (page - 1) * setting.PageSize
 	}

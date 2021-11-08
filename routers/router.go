@@ -1,14 +1,14 @@
 package routers
 
 import (
-	jwt "gin-blog/middleware/jwt"
+	"gin-blog/controller/api"
+	"gin-blog/controller/api/v1"
+	_ "gin-blog/docs"
+	"gin-blog/middleware/jwt"
 	"gin-blog/pkg/setting"
-	"gin-blog/routers/api"
-	"gin-blog/routers/api/v1"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
-	_ "gin-blog/docs"
 )
 
 func InitRouter() *gin.Engine {
@@ -22,10 +22,18 @@ func InitRouter() *gin.Engine {
 	r.GET("/auth", api.GetAuth)
 
 	apiv1 := r.Group("/api/v1")
+	addGroupRouter(apiv1)
+
+	return r
+}
+
+func addGroupRouter(apiv1 *gin.RouterGroup) {
 	apiv1.Use(jwt.JWT())
 	{
 		//获取标签列表
 		apiv1.GET("/tags", v1.GetTags)
+		//获取标签详情
+		apiv1.GET("/tags/:id", v1.GetTag)
 		//新建标签
 		apiv1.POST("/tags", v1.AddTag)
 		//更新指定标签
@@ -44,5 +52,4 @@ func InitRouter() *gin.Engine {
 		//删除指定文章
 		apiv1.DELETE("/articles/:id", v1.DeleteArticle)
 	}
-	return r
 }

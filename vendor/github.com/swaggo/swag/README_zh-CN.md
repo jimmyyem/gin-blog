@@ -46,10 +46,13 @@ Swag将Go的注释转换为Swagger2.0文档。我们为流行的 [Go Web Framewo
 2. 使用如下命令下载swag：
 
 ```bash
-go get -u github.com/swaggo/swag/cmd/swag
+$ go get -u github.com/swaggo/swag/cmd/swag
+
+# 1.16 及以上版本
+$ go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
-从源码开始构建的话，需要有Go环境（1.9及以上版本）。
+从源码开始构建的话，需要有Go环境（1.13及以上版本）。
 
 或者从github的release页面下载预编译好的二进制文件。
 
@@ -106,7 +109,7 @@ import "github.com/swaggo/files" // swagger embed files
 
 2. 在`main.go`源代码中添加通用的API注释：
 
-```bash
+```go
 // @title Swagger Example API
 // @version 1.0
 // @description This is a sample server celler server.
@@ -241,9 +244,9 @@ import (
 // @Param id path int true "Account ID"
 // @Success 200 {object} model.Account
 // @Header 200 {string} Token "qwerty"
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
+// @Failure 400,404 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
+// @Failure default {object} httputil.DefaultError
 // @Router /accounts/{id} [get]
 func (c *Controller) ShowAccount(ctx *gin.Context) {
     id := ctx.Param("id")
@@ -268,9 +271,9 @@ func (c *Controller) ShowAccount(ctx *gin.Context) {
 // @Param q query string false "name search by q"
 // @Success 200 {array} model.Account
 // @Header 200 {string} Token "qwerty"
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
+// @Failure 400,404 {object} httputil.HTTPError
 // @Failure 500 {object} httputil.HTTPError
+// @Failure default {object} httputil.DefaultError
 // @Router /accounts [get]
 func (c *Controller) ListAccounts(ctx *gin.Context) {
     q := ctx.Request.URL.Query().Get("q")
@@ -289,7 +292,7 @@ func (c *Controller) ListAccounts(ctx *gin.Context) {
 swag init
 ```
 
-4. 运行程序，然后在浏览器中访问 http://localhost:8080/swagger/index.html。将看到Swagger 2.0 Api文档，如下所示：
+4. 运行程序，然后在浏览器中访问 http://localhost:8080/swagger/index.html 。将看到Swagger 2.0 Api文档，如下所示：
 
 ![swagger_index.html](https://raw.githubusercontent.com/swaggo/swag/master/assets/swagger-image.png)
 
@@ -336,6 +339,8 @@ swag init
 | license.url             | 用于API的许可证的URL。 必须采用网址格式。                                                       | // @license.url http://www.apache.org/licenses/LICENSE-2.0.html |
 | host                    | 运行API的主机（主机名或IP地址）。                                                               | // @host localhost:8080                                         |
 | BasePath                | 运行API的基本路径。                                                                             | // @BasePath /api/v1                                            |
+| accept                  | API 可以使用的 MIME 类型列表。 请注意，Accept 仅影响具有请求正文的操作，例如 POST、PUT 和 PATCH。 值必须如“[Mime类型](#mime-types)”中所述。                                  | // @accept json |
+| produce                 | API可以生成的MIME类型的列表。值必须如“[Mime类型](#mime-types)”中所述。                                  | // @produce json |
 | query.collection.format | 请求URI query里数组参数的默认格式：csv，multi，pipes，tsv，ssv。 如果未设置，则默认为csv。 | // @query.collection.format multi                               |
 | schemes                 | 用空格分隔的请求的传输协议。                                                                    | // @schemes http https                                          |
 | x-name                  | 扩展的键必须以x-开头，并且只能使用json值                                                        | // @x-example-key {"key": "value"}                              |
@@ -356,26 +361,27 @@ swag init
 
 Example [celler/controller](https://github.com/swaggo/swag/tree/master/example/celler/controller)
 
-| 注释                 | 描述                                                                                                    |                                                    |
-| -------------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| 注释                 | 描述                                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
 | description          | 操作行为的详细说明。                                                                                    |
-| description.markdown | 应用程序的简短描述。该描述将从名为`endpointname.md`的文件中读取。                                       | // @description.file endpoint.description.markdown |
+| description.markdown | 应用程序的简短描述。该描述将从名为`endpointname.md`的文件中读取。                                       |
 | id                   | 用于标识操作的唯一字符串。在所有API操作中必须唯一。                                                     |
 | tags                 | 每个API操作的标签列表，以逗号分隔。                                                                     |
 | summary              | 该操作的简短摘要。                                                                                      |
-| accept               | API可以使用的MIME类型的列表。值必须如“[Mime类型](#mime-types)”中所述。                                  |
+| accept               | API 可以使用的 MIME 类型列表。 请注意，Accept 仅影响具有请求正文的操作，例如 POST、PUT 和 PATCH。 值必须如“[Mime类型](#mime-types)”中所述。                                  |
 | produce              | API可以生成的MIME类型的列表。值必须如“[Mime类型](#mime-types)”中所述。                                  |
 | param                | 用空格分隔的参数。`param name`,`param type`,`data type`,`is mandatory?`,`comment` `attribute(optional)` |
-| security             | 每个API操作的[安全性](#security)。                                                                      |
+| security             | 每个API操作的[安全性](#安全性)。                                                                      |
 | success              | 以空格分隔的成功响应。`return code`,`{param type}`,`data type`,`comment`                                |
 | failure              | 以空格分隔的故障响应。`return code`,`{param type}`,`data type`,`comment`                                |
+| response             | 与success、failure作用相同                                                                               |
 | header               | 以空格分隔的头字段。 `return code`,`{param type}`,`data type`,`comment`                                 |
 | router               | 以空格分隔的路径定义。 `path`,`[httpMethod]`                                                            |
 | x-name               | 扩展字段必须以`x-`开头，并且只能使用json值。                                                            |
 
 ## Mime类型
 
-`swag` g接受所有格式正确的MIME类型, 即使匹配 `*/*`。除此之外，`swag`还接受某些MIME类型的别名，如下所示：
+`swag` 接受所有格式正确的MIME类型, 即使匹配 `*/*`。除此之外，`swag`还接受某些MIME类型的别名，如下所示：
 
 | Alias                 | MIME Type                         |
 | --------------------- | --------------------------------- |
@@ -434,7 +440,7 @@ Example [celler/controller](https://github.com/swaggo/swag/tree/master/example/c
 // @Param enumint query int false "int enums" Enums(1, 2, 3)
 // @Param enumnumber query number false "int enums" Enums(1.1, 1.2, 1.3)
 // @Param string query string false "string valid" minlength(5) maxlength(10)
-// @Param int query int false "int valid" mininum(1) maxinum(10)
+// @Param int query int false "int valid" minimum(1) maximum(10)
 // @Param default query string false "string default" default(A)
 // @Param collection query []string false "string collection" collectionFormat(multi)
 ```
@@ -536,8 +542,11 @@ type Order struct { //in `proto` package
 
 ```go
 // @Success 200 {string} string	"ok"
+// @failure 400 {string} string	"error"
+// @response default {string} string	"other error"
 // @Header 200 {string} Location "/entity/1"
-// @Header 200 {string} Token "qwerty"
+// @Header 200,400,default {string} Token "token"
+// @Header all {string} Token2 "token2"
 ```
 
 ### 使用多路径参数
@@ -652,7 +661,7 @@ type Account struct {
 
 ```go
 type Account struct {
-    ID   string    `json:"id"   extensions:"x-nullable,x-abc=def"` // 扩展字段必须以"x-"开头
+    ID   string    `json:"id"   extensions:"x-nullable,x-abc=def,!x-omitempty"` // 扩展字段必须以"x-"开头
 }
 ```
 
@@ -665,7 +674,8 @@ type Account struct {
         "id": {
             "type": "string",
             "x-nullable": true,
-            "x-abc": "def"
+            "x-abc": "def",
+            "x-omitempty": false
         }
     }
 }

@@ -1,5 +1,6 @@
 .idea/
 .gitee/
 .runtime/
-runtime/
+runtime/logs/
 docs/
+vendor/

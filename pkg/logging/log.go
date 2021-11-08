@@ -1,63 +1,60 @@
 package logging
 
 import (
-	"fmt"
-	"log"
+	"github.com/sirupsen/logrus"
 	"os"
-	"path/filepath"
-	"runtime"
 )
 
 type Level int
 
 var (
-	F                  *os.File
-	DefaultPrefix      = ""
-	DefaultCallerDepth = 2
-	logger             *log.Logger
-	logPrefix          = ""
-	levelFlags         = []string{"DEBUG", "INFO", "WARN", "ERROR", "FATAL"}
-)
-
-const (
-	DEBUG Level = iota
-	INFO
-	WARNING
-	ERROR
-	FATAL
+	out1, out2 *os.File
+	Logger     *logrus.Logger
+	SqlLogger  *logrus.Logger
 )
 
 func init() {
-	filePath := getLogFileFullPath()
-	F = openLogFile(filePath)
-	logger = log.New(F, DefaultPrefix, log.LstdFlags)
+	// 普通日志
+	filePath := getLogFileFullPath("")
+	out1 = openLogFile(filePath)
+	Logger = logrus.New()
+	Logger.SetOutput(out1)
+
+	// SQL日志
+	filePath = getLogFileFullPath("sql")
+	out2 = openLogFile(filePath)
+	SqlLogger = logrus.New()
+	SqlLogger.SetOutput(out2)
+
+	//设置日志级别
+	Logger.SetLevel(logrus.DebugLevel)
+	SqlLogger.SetLevel(logrus.DebugLevel)
+
+	//设置日志格式
+	Logger.SetFormatter(&logrus.TextFormatter{
+		TimestampFormat: "2006-01-02 15:04:05",
+	})
+	SqlLogger.SetFormatter(&logrus.TextFormatter{
+		TimestampFormat: "2006-01-02 15:04:05",
+	})
 }
+
 func Debug(v ...interface{}) {
-	setPrefix(DEBUG)
-	logger.Println(v)
+	Logger.Debug(v)
 }
+
 func Info(v ...interface{}) {
-	setPrefix(INFO)
-	logger.Println(v)
+	Logger.Info(v)
 }
+
 func Warn(v ...interface{}) {
-	setPrefix(WARNING)
-	logger.Println(v)
+	Logger.Warn(v)
 }
+
 func Error(v ...interface{}) {
-	setPrefix(ERROR)
-	logger.Println(v)
+	Logger.Error(v)
 }
+
 func Fatal(v ...interface{}) {
-	setPrefix(FATAL)
-	logger.Fatalln(v)
-}
-func setPrefix(level Level) {
-	_, file, line, ok := runtime.Caller(DefaultCallerDepth)
-	if ok {
-		logPrefix = fmt.Sprintf("[%s][%s:%d]", levelFlags[level], filepath.Base(file), line)
-	} else {
-		logPrefix = fmt.Sprintf("[%s]", levelFlags[level])
-	}
-	logger.SetPrefix(logPrefix)
+	Logger.Fatal(v)
 }

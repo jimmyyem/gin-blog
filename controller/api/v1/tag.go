@@ -8,7 +8,7 @@ import (
 	"gin-blog/pkg/util"
 	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
-	"github.com/unknwon/com"
+	"github.com/spf13/cast"
 	"net/http"
 )
 
@@ -20,23 +20,44 @@ import (
 // @Router /api/v1/tags [get]
 func GetTags(c *gin.Context) {
 	name := c.Query("name")
-	maps := make(map[string]interface{})
+	maps := models.CommonMaps()
 	data := make(map[string]interface{})
+
 	if name != "" {
 		maps["name"] = name
 	}
-	var state int = -1
-	if arg := c.Query("state"); arg != "" {
-		state = com.StrTo(arg).MustInt()
-		maps["state"] = state
-	}
+
 	code := e.SUCCESS
-	data["lists"] = models.GetTags(util.GetPage(c), setting.PageSize, maps)
+	data["lists"] = models.GetTags(util.GetOffset(c), setting.PageSize, maps)
 	data["total"] = models.GetTagTotal(maps)
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": code,
-		"msg":  e.GetMsg(code),
+		"msg":  code.String(),
+		"data": data,
+	})
+}
+
+// @Summary Get multiple article tags
+// @Produce  json
+// @Param id path int false "Id"
+// @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
+// @Router /api/v1/tag/:id [get]
+func GetTag(c *gin.Context) {
+	id := cast.ToInt(c.Param("id"))
+	maps := models.CommonMaps()
+	var data = models.Tag{}
+
+	code := e.INVALID_PARAMS
+	if id > 0 {
+		code = e.SUCCESS
+		maps["id"] = id
+		data = models.GetTag(maps)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": code,
+		"msg":  code.String(),
 		"data": data,
 	})
 }
@@ -49,22 +70,20 @@ func GetTags(c *gin.Context) {
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/tags [post]
 func AddTag(c *gin.Context) {
-	name := c.Query("name")
-	state := com.StrTo(c.DefaultQuery("state", "0")).MustInt()
-	createdBy := c.Query("created_by")
+	name := c.PostForm("name")
+	createdBy := c.PostForm("created_by")
 
 	valid := validation.Validation{}
 	valid.Required(name, "name").Message("名称不能为空")
 	valid.MaxSize(name, 100, "name").Message("名称最长为100字符")
 	valid.Required(createdBy, "created_by").Message("创建人不能为空")
 	valid.MaxSize(createdBy, 100, "created_by").Message("创建人最长为100字符")
-	valid.Range(state, 0, 1, "state").Message("状态只允许0或1")
 
 	code := e.INVALID_PARAMS
 	if ! valid.HasErrors() {
 		if ! models.ExistTagByName(name) {
 			code = e.SUCCESS
-			models.AddTag(name, state, createdBy)
+			models.AddTag(name, createdBy)
 		} else {
 			code = e.ERROR_EXIST_TAG
 		}
@@ -75,8 +94,8 @@ func AddTag(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": code,
-		"msg":  e.GetMsg(code),
-		"data": make(map[string]string),
+		"msg":  code.String(),
+		"data": nil,
 	})
 }
 
@@ -89,23 +108,19 @@ func AddTag(c *gin.Context) {
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/tags/{id} [put]
 func EditTag(c *gin.Context) {
-	id := com.StrTo(c.Param("id")).MustInt()
-	name := c.Query("name")
-	modifiedBy := c.Query("modified_by")
+	id := cast.ToInt(c.Param("id"))
+	state := cast.ToInt(c.DefaultPostForm("state", "-1"))
+	name := c.PostForm("name")
+	modifiedBy := c.PostForm("modified_by")
 
 	valid := validation.Validation{}
-	var state int = -1
-	if arg := c.Query("state"); arg != "" {
-		state = com.StrTo(arg).MustInt()
-		valid.Range(state, 0, 1, "state").Message("状态只允许0或1")
-	}
 	valid.Required(id, "id").Message("ID不能为空")
 	valid.Required(modifiedBy, "modified_by").Message("修改人不能为空")
 	valid.MaxSize(modifiedBy, 100, "modified_by").Message("修改人最长为100字符")
 	valid.MaxSize(name, 100, "name").Message("名称最长为100字符")
 
 	code := e.INVALID_PARAMS
-	if ! valid.HasErrors() {
+	if !valid.HasErrors() {
 		code = e.SUCCESS
 		if models.ExistTagByID(id) {
 			data := make(map[string]interface{})
@@ -127,8 +142,8 @@ func EditTag(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": code,
-		"msg":  e.GetMsg(code),
-		"data": make(map[string]string),
+		"msg":  code.String(),
+		"data": nil,
 	})
 }
 
@@ -138,7 +153,7 @@ func EditTag(c *gin.Context) {
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/tags/{id} [delete]
 func DeleteTag(c *gin.Context) {
-	id := com.StrTo(c.Param("id")).MustInt()
+	id := cast.ToInt(c.Param("id"))
 
 	valid := validation.Validation{}
 	valid.Min(id, 1, "id").Message("ID必须大于0")
@@ -158,7 +173,7 @@ func DeleteTag(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": code,
-		"msg":  e.GetMsg(code),
-		"data": make(map[string]string),
+		"msg":  code.String(),
+		"data": nil,
 	})
 }

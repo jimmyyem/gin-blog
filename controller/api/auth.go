@@ -44,7 +44,7 @@ func GetAuth(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": code,
-		"msg":  e.GetMsg(code),
+		"msg":  code.String(),
 		"data": data,
 	})
 }
