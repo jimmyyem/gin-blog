@@ -20,8 +20,13 @@ func InitRouter() *gin.Engine {
 	r.Use(gin.Recovery())
 	gin.SetMode(setting.RunMode)
 
+	// 设置静态页面目录
+	r.Static("/static", "./static")
+
+	// 设置swagger路径
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// 模板信息
 	r.Delims("{{", "}}")
 	r.SetFuncMap(template.FuncMap{
 		"formatAsTime": util.FormatAsTime,
