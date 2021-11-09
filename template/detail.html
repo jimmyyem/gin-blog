@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="static/bootstrap-3.4.1/css/bootstrap.min.css" type="text/css"/>
+    <link href="static/bootstrap-3.4.1/css/bootstrap-theme.css" type="text/css"/>
+    <script src="static/bootstrap-3.4.1/js/bootstrap.min.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="container">
+    <h4>
+        {{ .title }}
+    </h4>
+
+    <div>
+        <h4>{{ .article.Title }}</h4>
+        <h4>{{ .article.Desc }}</h4>
+        <h4>{{ .article.Content }}</h4>
+        <h4>{{ .article.Model.Ctime | formatAsTime }}</h4>
+    </div>
+
+</div>
+</body>
+</html>

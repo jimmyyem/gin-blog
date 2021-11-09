@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="static/bootstrap-3.4.1/css/bootstrap.min.css" type="text/css"/>
+    <link href="static/bootstrap-3.4.1/css/bootstrap-theme.css" type="text/css"/>
+    <script src="static/bootstrap-3.4.1/js/bootstrap.min.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="container">
+    <h1>
+        {{ .title }}
+    </h1>
+
+    {{ range .list }}
+    <div>
+        <a href="/detail?id={{.ID}}">{{ .Title }}</a>
+    </div>
+    {{ end }}
+
+    文章总数: {{ .total }}
+</div>
+</body>
+</html>

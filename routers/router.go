@@ -1,14 +1,17 @@
 package routers
 
 import (
+	"gin-blog/controller"
 	"gin-blog/controller/api"
 	"gin-blog/controller/api/v1"
 	_ "gin-blog/docs"
 	"gin-blog/middleware/jwt"
 	"gin-blog/pkg/setting"
+	"gin-blog/pkg/util"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"html/template"
 )
 
 func InitRouter() *gin.Engine {
@@ -19,12 +22,27 @@ func InitRouter() *gin.Engine {
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	r.GET("/auth", api.GetAuth)
+	r.Delims("{{", "}}")
+	r.SetFuncMap(template.FuncMap{
+		"formatAsTime": util.FormatAsTime,
+	})
+	r.LoadHTMLGlob("template/*.html")
 
+	// pc网页路由
+	pcGroup := r.Group("")
+	addGroupPc(pcGroup)
+
+	// api路由
 	apiv1 := r.Group("/api/v1")
 	addGroupRouter(apiv1)
 
 	return r
+}
+
+func addGroupPc(pc *gin.RouterGroup) {
+	pc.Any("/auth", api.GetAuth)
+	pc.GET("/index", controller.Index)
+	pc.GET("/detail", controller.Detail)
 }
 
 func addGroupRouter(apiv1 *gin.RouterGroup) {
