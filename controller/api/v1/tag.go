@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"gin-blog/controller"
 	"gin-blog/models"
 	"gin-blog/pkg/e"
 	"gin-blog/pkg/logging"
@@ -12,13 +13,17 @@ import (
 	"net/http"
 )
 
+type TagController struct {
+	controller.BaseController
+}
+
 // @Summary Get multiple article tags
 // @Produce  json
 // @Param name query string false "Name"
 // @Param state query int false "State"
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/tags [get]
-func GetTags(c *gin.Context) {
+func (t TagController) GetTags(c *gin.Context) {
 	name := c.Query("name")
 	maps := models.CommonMaps()
 	data := make(map[string]interface{})
@@ -31,11 +36,8 @@ func GetTags(c *gin.Context) {
 	data["lists"] = models.GetTags(util.GetOffset(c), setting.PageSize, maps)
 	data["total"] = models.GetTagTotal(maps)
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  code.String(),
-		"data": data,
-	})
+	res := t.ToJSON(code, data)
+	c.JSON(http.StatusOK, res)
 }
 
 // @Summary Get multiple article tags
@@ -43,7 +45,7 @@ func GetTags(c *gin.Context) {
 // @Param id path int false "Id"
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/tag/:id [get]
-func GetTag(c *gin.Context) {
+func (t TagController) GetTag(c *gin.Context) {
 	id := cast.ToInt(c.Param("id"))
 	maps := models.CommonMaps()
 	var data = models.Tag{}
@@ -55,11 +57,8 @@ func GetTag(c *gin.Context) {
 		data = models.GetTag(maps)
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  code.String(),
-		"data": data,
-	})
+	res := t.ToJSON(code, data)
+	c.JSON(http.StatusOK, res)
 }
 
 // @Summary 新增文章标签
@@ -69,7 +68,7 @@ func GetTag(c *gin.Context) {
 // @Param created_by query int false "CreatedBy"
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/tags [post]
-func AddTag(c *gin.Context) {
+func (t TagController) AddTag(c *gin.Context) {
 	name := c.PostForm("name")
 	createdBy := c.PostForm("created_by")
 
@@ -92,11 +91,9 @@ func AddTag(c *gin.Context) {
 			logging.Error(err.Key + "=>" + err.Message)
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  code.String(),
-		"data": nil,
-	})
+
+	res := t.ToJSON(code, nil)
+	c.JSON(http.StatusOK, res)
 }
 
 // @Summary 修改文章标签
@@ -107,7 +104,7 @@ func AddTag(c *gin.Context) {
 // @Param modified_by query string true "ModifiedBy"
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/tags/{id} [put]
-func EditTag(c *gin.Context) {
+func (t TagController) EditTag(c *gin.Context) {
 	id := cast.ToInt(c.Param("id"))
 	state := cast.ToInt(c.DefaultPostForm("state", "-1"))
 	name := c.PostForm("name")
@@ -140,11 +137,9 @@ func EditTag(c *gin.Context) {
 			logging.Error(err.Key + "=>" + err.Message)
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  code.String(),
-		"data": nil,
-	})
+
+	res := t.ToJSON(code, nil)
+	c.JSON(http.StatusOK, res)
 }
 
 // @Summary Delete article tag
@@ -152,7 +147,7 @@ func EditTag(c *gin.Context) {
 // @Param id path int true "ID"
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/tags/{id} [delete]
-func DeleteTag(c *gin.Context) {
+func (t TagController) DeleteTag(c *gin.Context) {
 	id := cast.ToInt(c.Param("id"))
 
 	valid := validation.Validation{}
@@ -171,9 +166,7 @@ func DeleteTag(c *gin.Context) {
 			logging.Error(err.Key + "=>" + err.Message)
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  code.String(),
-		"data": nil,
-	})
+
+	res := t.ToJSON(code, nil)
+	c.JSON(http.StatusOK, res)
 }

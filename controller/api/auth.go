@@ -1,6 +1,7 @@
 package api
 
 import (
+	"gin-blog/controller"
 	"gin-blog/models"
 	"gin-blog/pkg/e"
 	"gin-blog/pkg/logging"
@@ -15,7 +16,11 @@ type auth struct {
 	Password string `valid:"Required; MaxSize(50)"`
 }
 
-func GetAuth(c *gin.Context) {
+type AuthController struct {
+	controller.BaseController
+}
+
+func (this AuthController) GetAuth(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
 
@@ -42,9 +47,7 @@ func GetAuth(c *gin.Context) {
 			logging.Error(err.Key + "=>" + err.Message)
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  code.String(),
-		"data": data,
-	})
+
+	res := this.ToJSON(code, data)
+	c.JSON(http.StatusOK, res)
 }

@@ -45,34 +45,39 @@ func InitRouter() *gin.Engine {
 }
 
 func addGroupPc(pc *gin.RouterGroup) {
-	pc.Any("/auth", api.GetAuth)
-	pc.GET("/index", controller.Index)
-	pc.GET("/detail", controller.Detail)
+	auth := api.AuthController{}
+	pc.Any("/auth", auth.GetAuth)
+
+	index := controller.IndexController{}
+	pc.GET("/index", index.Index)
+	pc.GET("/detail", index.Detail)
 }
 
 func addGroupRouter(apiv1 *gin.RouterGroup) {
 	apiv1.Use(jwt.JWT())
 	{
+		tag := v1.TagController{}
 		//获取标签列表
-		apiv1.GET("/tags", v1.GetTags)
+		apiv1.GET("/tags", tag.GetTags)
 		//获取标签详情
-		apiv1.GET("/tags/:id", v1.GetTag)
+		apiv1.GET("/tags/:id", tag.GetTag)
 		//新建标签
-		apiv1.POST("/tags", v1.AddTag)
+		apiv1.POST("/tags", tag.AddTag)
 		//更新指定标签
-		apiv1.PUT("/tags/:id", v1.EditTag)
+		apiv1.PUT("/tags/:id", tag.EditTag)
 		//删除指定标签
-		apiv1.DELETE("/tags/:id", v1.DeleteTag)
+		apiv1.DELETE("/tags/:id", tag.DeleteTag)
 
+		art := v1.ArticleControoler{}
 		//获取文章列表
-		apiv1.GET("/articles", v1.GetArticles)
+		apiv1.GET("/articles", art.GetArticles)
 		//获取指定文章
-		apiv1.GET("/articles/:id", v1.GetArticle)
+		apiv1.GET("/articles/:id", art.GetArticle)
 		//新建文章
-		apiv1.POST("/articles", v1.AddArticle)
+		apiv1.POST("/articles", art.AddArticle)
 		//更新指定文章
-		apiv1.PUT("/articles/:id", v1.EditArticle)
+		apiv1.PUT("/articles/:id", art.EditArticle)
 		//删除指定文章
-		apiv1.DELETE("/articles/:id", v1.DeleteArticle)
+		apiv1.DELETE("/articles/:id", art.DeleteArticle)
 	}
 }

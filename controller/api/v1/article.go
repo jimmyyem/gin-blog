@@ -2,6 +2,7 @@ package v1
 
 import (
 	"fmt"
+	"gin-blog/controller"
 	"gin-blog/models"
 	"gin-blog/pkg/e"
 	"gin-blog/pkg/logging"
@@ -13,12 +14,16 @@ import (
 	"net/http"
 )
 
+type ArticleControoler struct {
+	controller.BaseController
+}
+
 // @Summary Get a single article
 // @Produce  json
 // @Param id path int true "ID"
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/articles/{id} [get]
-func GetArticle(c *gin.Context) {
+func (a ArticleControoler) GetArticle(c *gin.Context) {
 	id := cast.ToInt(c.Param("id"))
 
 	valid := validation.Validation{}
@@ -41,11 +46,11 @@ func GetArticle(c *gin.Context) {
 		}
 		fmt.Println(errMap)
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  code.String(),
-		"data": data,
-	})
+
+	// 构造返回内容
+	res := a.ToJSON(code, data)
+
+	c.JSON(http.StatusOK, res)
 }
 
 // @Summary Get multiple articles
@@ -55,7 +60,7 @@ func GetArticle(c *gin.Context) {
 // @Param created_by body int false "CreatedBy"
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/articles [get]
-func GetArticles(c *gin.Context) {
+func (a ArticleControoler) GetArticles(c *gin.Context) {
 	data := make(map[string]interface{})
 	maps := models.CommonMaps()
 
@@ -77,11 +82,9 @@ func GetArticles(c *gin.Context) {
 			logging.Error(err.Key + "=>" + err.Message)
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  code.String(),
-		"data": data,
-	})
+
+	res := a.ToJSON(code, data)
+	c.JSON(http.StatusOK, res)
 }
 
 // @Summary Add article
@@ -94,7 +97,7 @@ func GetArticles(c *gin.Context) {
 // @Param state body int true "State"
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/articles [post]
-func AddArticle(c *gin.Context) {
+func (a ArticleControoler) AddArticle(c *gin.Context) {
 	tagId := cast.ToInt(c.PostForm("tag_id"))
 	title := c.PostForm("title")
 	desc := c.PostForm("desc")
@@ -128,11 +131,9 @@ func AddArticle(c *gin.Context) {
 			logging.Error(err.Key + "=>" + err.Message)
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  code.String(),
-		"data": make(map[string]interface{}),
-	})
+
+	res := a.ToJSON(code, nil)
+	c.JSON(http.StatusOK, res)
 }
 
 // @Summary Update article
@@ -146,7 +147,7 @@ func AddArticle(c *gin.Context) {
 // @Param state body int false "State"
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/articles/{id} [put]
-func EditArticle(c *gin.Context) {
+func (a ArticleControoler) EditArticle(c *gin.Context) {
 	valid := validation.Validation{}
 	id := cast.ToInt(c.Param("id"))
 	tagId := cast.ToInt(c.DefaultPostForm("tag_id", ""))
@@ -209,11 +210,9 @@ func EditArticle(c *gin.Context) {
 			logging.Error(err.Key + "=>" + err.Message)
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  code.String(),
-		"data": make(map[string]string),
-	})
+
+	res := a.ToJSON(code, nil)
+	c.JSON(http.StatusOK, res)
 }
 
 // @Summary Delete article
@@ -221,7 +220,7 @@ func EditArticle(c *gin.Context) {
 // @Param id path int true "ID"
 // @Success 200 {string} json "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/articles/{id} [delete]
-func DeleteArticle(c *gin.Context) {
+func (a ArticleControoler) DeleteArticle(c *gin.Context) {
 	id := cast.ToInt(c.Param("id"))
 	valid := validation.Validation{}
 	valid.Min(id, 1, "id").Message("ID必须大于0")
@@ -238,9 +237,6 @@ func DeleteArticle(c *gin.Context) {
 			logging.Error(err.Key + "=>" + err.Message)
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  code.String(),
-		"data": make(map[string]string),
-	})
+	res := a.ToJSON(code, nil)
+	c.JSON(http.StatusOK, res)
 }
