@@ -9,8 +9,13 @@ MySQL/MariaDB as database
 
 #### 安装教程
 
-1.  基于Docker启动MySQL/MariaDB
-2.  
+1. 先导入database里所有tables
+2. 安装swagger，并且生成docs目录
+```cgo
+    go install github.com/swaggo/swag/cmd/swag
+    swagger init
+```
+3. go mod vendor
 
 #### 使用说明
 
