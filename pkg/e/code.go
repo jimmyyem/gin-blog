@@ -4,8 +4,8 @@ package e
 type ErrCode int
 
 const (
-	SUCCESS                        ErrCode = 10000 + iota // ok
-	ERROR                                                 // fail
+	SUCCESS                        ErrCode = 0            // ok
+	ERROR                          ErrCode = 10000 + iota // fail
 	INVALID_PARAMS                                        // 请求参数错误
 	ERROR_EXIST_TAG                                       // 已存在该标签名称
 	ERROR_NOT_EXIST_TAG                                   // 该标签不存在

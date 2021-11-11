@@ -8,7 +8,7 @@ func _() {
 	// An "invalid array index" compiler error signifies that the constant values have changed.
 	// Re-run the stringer command to generate them again.
 	var x [1]struct{}
-	_ = x[SUCCESS-10000]
+	_ = x[SUCCESS-0]
 	_ = x[ERROR-10001]
 	_ = x[INVALID_PARAMS-10002]
 	_ = x[ERROR_EXIST_TAG-10003]
@@ -20,14 +20,23 @@ func _() {
 	_ = x[ERROR_AUTH-10009]
 }
 
-const _ErrCode_name = "okfail请求参数错误已存在该标签名称该标签不存在该文章不存在Token鉴权失败Token已超时Token生成失败Token错误"
+const (
+	_ErrCode_name_0 = "ok"
+	_ErrCode_name_1 = "fail请求参数错误已存在该标签名称该标签不存在该文章不存在Token鉴权失败Token已超时Token生成失败Token错误"
+)
 
-var _ErrCode_index = [...]uint8{0, 2, 6, 24, 48, 66, 84, 101, 115, 132, 143}
+var (
+	_ErrCode_index_1 = [...]uint8{0, 4, 22, 46, 64, 82, 99, 113, 130, 141}
+)
 
 func (i ErrCode) String() string {
-	i -= 10000
-	if i < 0 || i >= ErrCode(len(_ErrCode_index)-1) {
-		return "ErrCode(" + strconv.FormatInt(int64(i+10000), 10) + ")"
+	switch {
+	case i == 0:
+		return _ErrCode_name_0
+	case 10001 <= i && i <= 10009:
+		i -= 10001
+		return _ErrCode_name_1[_ErrCode_index_1[i]:_ErrCode_index_1[i+1]]
+	default:
+		return "ErrCode(" + strconv.FormatInt(int64(i), 10) + ")"
 	}
-	return _ErrCode_name[_ErrCode_index[i]:_ErrCode_index[i+1]]
 }
