@@ -1,6 +1,7 @@
 .idea/
 .gitee/
 .runtime/
+conf/app.ini
 runtime/logs/
 vendor/
 tmp/

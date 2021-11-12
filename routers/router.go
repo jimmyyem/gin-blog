@@ -49,6 +49,7 @@ func addGroupPc(pc *gin.RouterGroup) {
 	pc.Any("/auth", auth.GetAuth)
 
 	index := controller.IndexController{}
+	pc.GET("/", index.Index)
 	pc.GET("/index", index.Index)
 	pc.GET("/detail", index.Detail)
 }
